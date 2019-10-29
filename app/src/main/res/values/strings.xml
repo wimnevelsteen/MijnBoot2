@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MijnBoot</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="title_activity_bluetooth_connect">Connect to Bluetooth serial device</string>
+    <string name="Text">Status: -</string>
+    <string name="on">Turn On</string>
+    <string name="List">List paired</string>
+    <string name="Find">Search/Cancel</string>
+    <string name="StopBoot">Stop boot</string>
+    <string name="StartPomp">Start pomp</string>
+    <string name="StopPomp">Stop pomp</string>
+</resources>
