@@ -9,9 +9,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.util.Log;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -28,9 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-import com.example.mijnboot.communications.Protocol;
-import com.example.mijnboot.communications.Directions;
-
 
 public class MainActivity extends AppCompatActivity {
     Thread workerThread;
@@ -42,13 +36,13 @@ public class MainActivity extends AppCompatActivity {
     private String stdSerialPortId;
     private TextView btCommandsListText;
 
-    private int speed, direction;
+    private int speed = 0;
+    private int direction = 90;
     private boolean progressChanged = false;
     private int readBufferPosition;
     private int transmitInterval;
     volatile boolean stopWorker;
     private byte[] readBuffer;
-    private Directions directions;
 
     private SeekBar speedSeekBar;
     private SeekBar directionSeekBar;
@@ -64,14 +58,13 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
 
+        String message = getIntent().getStringExtra(BluetoothListing.BLUETOOTH_CONNECT_STRING);
+        String btConnData[] = message.split("\\r?\\n");
 
         speedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            int progress = 0;
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
-                progress = progresValue;
-                Toast.makeText(getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
+                speed = progresValue;
                 progressChanged = true;
             }
 
@@ -85,12 +78,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         directionSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            int progress = 0;
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
-                progress = progresValue;
-                Toast.makeText(getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
+                direction = progresValue;
                 progressChanged = true;
             }
 
@@ -102,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+
+        connectToBluetooth(btConnData[1]);
     }
 
     @Override
@@ -127,28 +119,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonClick(View view) {
-        String toSend = "";
-        switch (view.getId()) {
-            case R.id.StopBoot:
-                speedSeekBar.setProgress(50);
-                directionSeekBar.setProgress(50);
-                progressChanged = true;
-                break;
-            default:
-                return;
-        }
-        try {
-            btOutputStream.write(toSend.getBytes());
-            //btOutputStream.write(Protocol.COMMAND_TERMINATOR.getBytes());
-        } catch (IOException e) {
-            communicationError();
-        }
+        speedSeekBar.setProgress(0);
+        directionSeekBar.setProgress(90);
+        progressChanged = true;
     }
 
     private void connectToBluetooth(String serial) {
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = btAdapter.getRemoteDevice(serial);
-        UUID uuid = UUID.fromString(stdSerialPortId);
+        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
         try {
             btSocket = device.createRfcommSocketToServiceRecord(uuid);
             btSocket.connect();
@@ -198,9 +177,12 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 if (progressChanged) {
-                    btOutputStream.write(directions.toBluetoothStream(direction, speed));
+                    String newDirection = "<direction " + direction +">";
+                    btOutputStream.write(newDirection.getBytes());
+                    Toast.makeText(getApplicationContext(), newDirection,
+                            Toast.LENGTH_SHORT).show();
                 }
-            } catch (IOException $e) {
+            } catch (IOException e) {
                 communicationError();
             }
             progressChanged = false;

@@ -24,10 +24,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
 public class BluetoothListing extends AppCompatActivity{
-    public final static String BLUETOOTH_CONNECT_STRING = "ionescu.dan.remotecontrolledbluetooth.bluetooth_connect";
+    public final static String BLUETOOTH_CONNECT_STRING = "mijnboot.remotecontrolledbluetooth.bluetooth_connect";
     private static final int REQUEST_ENABLE_BT = 1;
     private Button onBtn;
     private Button listBtn;
